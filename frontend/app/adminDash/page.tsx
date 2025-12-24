@@ -435,17 +435,17 @@ export default function AdminDashboardPage() {
             <img
               src="/favicon.ico"
               alt="Logo"
-              className="h-10 w-19 object-contain m-0"
+              className="h-10 w-13 object-contain m-0"
             />
-            <h1 className="text-xl font-bold ml-2">
-              Tableau de Bord Administrateur
+            <h1 className="text-xl font-bold">
+              Admin Dashboard
             </h1>
           </div>
           <button
             onClick={handleLogout}
             className="flex items-center px-4 py-2 bg-[#FFD300] text-[#0A2342] rounded-lg hover:bg-yellow-400 active:scale-95 transition font-medium"
           >
-            Déconnexion
+            Logout
           </button>
         </div>
       </header>

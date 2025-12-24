@@ -1,4 +1,5 @@
 langchain-community
+langchain
 langchain-text-splitters
 langchain-huggingface
 sentence-transformers
@@ -10,3 +11,4 @@ PyJWT
 fastapi
 uvicorn
 pymysql
+pypdf
