@@ -7,35 +7,33 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain.chat_models import init_chat_model
 
-# Charger la clé API Google depuis le fichier .env
 def load_api_key():
     load_dotenv()
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
-        raise RuntimeError("❌ GOOGLE_API_KEY non trouvé dans le fichier .env")
-    os.environ["GOOGLE_API_KEY"] = api_key
+    os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 
-# Initialiser la base vectorielle Chroma avec HuggingFace embeddings
 def init_vector_store():
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
     return Chroma(
-        collection_name="knowledge_base",
+        collection_name="base_collection",
         embedding_function=embeddings,
-        persist_directory="./chroma_db",  # chemin où Chroma stocke les vecteurs
+        persist_directory="./chroma_db", 
     )
 
-# Construire le prompt système à partir des documents retrouvés
 def build_system_prompt(docs):
     context = "\n\n".join(d.page_content for d in docs)
-    return f"""You are an assistant for question-answering tasks.
-    Use the following pieces of retrieved context to answer the question.
-    If you don't know the answer, just say that you don't know.
-    Provide a complete and detailed answer, using the context as needed.
-    Context: {context}:"""
+    return f"""
+        You are a medical assistant. Answer questions solely based on the information provided in the "Knowledge" section below.
+        - Do NOT use any other knowledge or personal experience.
+        - Do NOT mention to the user that you are using provided knowledge.
+        - Be concise, clear, and professional.
+        - If the answer is not found in the knowledge, say "I don't know".
+        - Cite the source if relevant.
 
-# Fonction pour poser une question au modèle et récupérer réponse + documents
+        Knowledge:
+        {context}
+        """
 def ask_question(vector_store, llm, question: str):
-    docs = vector_store.similarity_search(question, k=3)  # recherche de 3 docs proches
+    docs = vector_store.similarity_search(question, k=4)
     system_prompt_fmt = build_system_prompt(docs)
     response = llm.invoke([
         SystemMessage(content=system_prompt_fmt),
@@ -43,7 +41,6 @@ def ask_question(vector_store, llm, question: str):
     ])
     return response, docs
 
-# Fonction d'initialisation globale appelée depuis main.py
 def init_rag():
     load_api_key()
     vector_store = init_vector_store()
